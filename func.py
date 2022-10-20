@@ -17,7 +17,6 @@ def initial_layout(sg):
         [sg.Column(choose_sheet,key='sheets',visible=False)],
         [sg.Text('Выберете сертификат для подписания'), sg.Input(key='PFX', readonly=True,text_color=color),
          sg.FileBrowse('выбрать', file_types=[('Сертификат', "*.pfx")])],
-        [sg.Text('Введите пароль от сертификата'), sg.InputText(key='PASSWORD', password_char='*')],
         [sg.Text('Выберете папку куда сохранить подписанный документ'), sg.Input(key='FOLDER', readonly=True,text_color=color ),
          sg.FolderBrowse('выбрать')],
         # [sg.ProgressBar(max_value=100)],
@@ -38,7 +37,7 @@ def check_input(values,sg):
     keys_missed = []
     key_dict = {'FILE': 'Не выбран файл для подписания',
                 'PFX': 'Не выбран сертификат для подписания',
-                'PASSWORD': 'Не введён пароль для сертификата',
+
                 'FOLDER': 'Не выбрана папка для сохранения подписанного документа',
                  }
     if values['type_file'] == 'EXCEL':

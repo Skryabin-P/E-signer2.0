@@ -47,7 +47,6 @@ while True:
         if check_input(values,sg):
             # window['waiting'].update(visible=True)
             pfx = values['PFX']
-            password = values['PASSWORD']
             folder = values['FOLDER']
             filename, file_extension = os.path.splitext(values['FILE'])
             if values['type_file'] == 'EXCEL':
@@ -57,7 +56,7 @@ while True:
                 pdf_to_sign = values['FILE']
                 output_file = f"{folder}/{values['FILE'].split('/')[-1]}"
             if pdf_to_sign != False:
-                res = sign(pfx,password,pdf_to_sign,output_file)
+                res = sign(pfx,'123',pdf_to_sign,output_file)
             else:
                 res = False
 

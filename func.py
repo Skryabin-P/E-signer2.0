@@ -1,22 +1,30 @@
+import os
+import time
+
 import pandas as pd
 import tempfile
 import pdfkit
 from win32com import client
 from openpyxl import load_workbook
-
+import subprocess
 def initial_layout(sg):
     choose_sheet = [[sg.Text('Выберете лист для подписи'),sg.Combo(key='sheet_list',size=(25,3),values=[])]]
+    color = 'black'
     common_layout = [
-        [sg.Text('Выберете файл для подписания'), sg.Input(key='FILE', enable_events=True, readonly=False),
+        [sg.Text('Выберете файл для подписания'), sg.Input(key='FILE', enable_events=True, readonly=True,text_color=color),
          sg.FileBrowse('выбрать',key='browse_files', file_types=[('Файлы для подписания', '*.pdf')])],
+        [sg.Text('Перед подписанием закройте PDF файл подлежащий подписанию!',key='caution',background_color='red',text_color='white')],
         [sg.Column(choose_sheet,key='sheets',visible=False)],
-        [sg.Text('Выберете сертификат для подписания'), sg.Input(key='PFX', readonly=True, ),
+        [sg.Text('Выберете сертификат для подписания'), sg.Input(key='PFX', readonly=True,text_color=color),
          sg.FileBrowse('выбрать', file_types=[('Сертификат', "*.pfx")])],
         [sg.Text('Введите пароль от сертификата'), sg.InputText(key='PASSWORD', password_char='*')],
-        [sg.Text('Выберете папку куда сохранить подписанный документ'), sg.Input(key='FOLDER', readonly=True, ),
+        [sg.Text('Выберете папку куда сохранить подписанный документ'), sg.Input(key='FOLDER', readonly=True,text_color=color ),
          sg.FolderBrowse('выбрать')],
         # [sg.ProgressBar(max_value=100)],
-        [sg.Button('Подписать', key='sign'), sg.Button('Сбросить', key='clear'), sg.Exit('Выйти', key='exit')]]
+        [sg.Checkbox(text = 'Открыть файл после подписания', key='open', default=True)],
+        [sg.Button('Подписать', key='sign'), sg.Button('Сбросить', key='clear'), sg.Exit('Выйти', key='exit')],
+        [sg.Text('Ожидайте завершения...',key='waiting',background_color='green',text_color='orange',visible=False)],
+        [sg.Text('Успешно подписан!',key='success',background_color='green',text_color='orange',visible=False)]]
     return common_layout
 
 def clear_input(window,sg):
@@ -57,15 +65,38 @@ def get_sheet_names(filepath):
     sheets = wb.sheetnames
     wb.close()
     return sheets
-def excel_to_pdf(values, filename: str):
-    excel = client.Dispatch("Excel.Application")
-    # excel.visible=0
-    wb = excel.Workbooks.Open(values['FILE'])
-    wb.application.displayalerts = False
+def excel_to_pdf(values):
+    try:
+        path_to_save = f'{values["FOLDER"]}/temp.pdf'
+        excel = client.Dispatch("Excel.Application")
+        excel.Interactive = False
+        excel.Visible = False
+        # excel.visible=0
+        wb = excel.Workbooks.Open(values['FILE'])
+        wb.application.displayalerts = False
+        work_sheets = wb.Sheets(values['sheet_list'])
+        # # Convert into PDF File
+        try:
+            work_sheets.ExportAsFixedFormat(0, path_to_save)
+        except:
+            os.remove(f'{values["FOLDER"]}/temp.pdf')
+            time.sleep(0.1)
+            work_sheets.ExportAsFixedFormat(0, path_to_save)
+        wb.Close()
+        excel.Quit()
+        # window.write_event_value('-THREAD-',path_to_save)
+        return path_to_save
+    except Exception as e:
+        print(e)
+        excel.Quit()
+        return False
 
-    print(get_sheet_names(wb))
+
+if __name__ == '__main__':
+    # import PySimpleGUI as sg
     #
-    # work_sheets = wb.Worksheets[1]
-    # # Convert into PDF File
-    # work_sheets.ExportAsFixedFormat(0, f'{values["FOLDER"]}/2.pdf')
-    wb.Close()
+    import win32api
+
+    print(win32api.FormatMessage(-2147018887))
+    # sg.theme_previewer()
+    # subprocess.Popen([ r"C:/Users/skryabin.p/Desktop/СЗ_лист №2 (оборотный).pdf"],shell=True)

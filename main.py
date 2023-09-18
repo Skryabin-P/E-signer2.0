@@ -11,13 +11,6 @@ sg.theme('DarkGreen7')
 
 
 def make_window(type='PDF'):
-    # if type == 'PDF':
-    #     pdf=True
-    #     excel = False
-    # else:
-    #     excel=True
-    #     pdf=False
-    # sg.Input
     layout = [  [sg.Text('Подписание НЭП',border_width=1,background_color='Blue',text_color='orange',size=(50,1),justification='center',auto_size_text=True,font=('Times new roman',20,'bold'))],
                 [sg.T("Тип файла для подписи: "),
                  sg.Combo(['PDF', 'EXCEL'], size=(10, 3), key='type_file', enable_events=True, default_value=type,
@@ -37,15 +30,16 @@ while True:
     # print(values)
     if event:
         window['success'].update(visible=False)
-    if event == sg.WIN_CLOSED or event=='exit':
+    if event == sg.WIN_CLOSED or event == 'exit':
         break
     elif event == 'clear':
         clear_input(window,sg)
 
     elif event == 'sign':
-
+        window['success'].update(visible=False)
         if check_input(values,sg):
             # window['waiting'].update(visible=True)
+            function = values['function']
             pfx = values['PFX']
             password = values['PASSWORD']
             folder = values['FOLDER']
@@ -56,12 +50,13 @@ while True:
             else:
                 pdf_to_sign = values['FILE']
                 output_file = f"{folder}/{values['FILE'].split('/')[-1]}"
+
             if pdf_to_sign != False:
-                res = sign(pfx,password,pdf_to_sign,output_file)
+                res = sign(function,pfx,password,pdf_to_sign,output_file)
             else:
                 res = False
 
-            # time.sleep(0.2)
+            time.sleep(0.2)
             if res:
                 if values['type_file'] == 'EXCEL':
                     os.remove(pdf_to_sign)
@@ -70,7 +65,7 @@ while True:
                     subprocess.Popen([output_file],shell=True)
             else:
                 sg.PopupError('Не удалось подписать документ, что-то пошло не так')
-            # window['waiting'].update(visible=False)
+            window['waiting'].update(visible=False)
     elif event == 'type_file':
         if values['type_file'] == 'PDF':
             window['sheets'].update(visible=False)

@@ -1,9 +1,8 @@
 import os
 import time
 
-import pandas as pd
+
 import tempfile
-import pdfkit
 from win32com import client
 from openpyxl import load_workbook
 import subprocess
@@ -11,6 +10,8 @@ def initial_layout(sg):
     choose_sheet = [[sg.Text('Выберете лист для подписи'),sg.Combo(key='sheet_list',size=(25,3),values=[])]]
     color = 'black'
     common_layout = [
+        [sg.Text('Введите название своей должности'),
+         sg.Input(key='function', enable_events=True, text_color='white')],
         [sg.Text('Выберете файл для подписания'), sg.Input(key='FILE', enable_events=True, readonly=True,text_color=color),
          sg.FileBrowse('выбрать',key='browse_files', file_types=[('Файлы для подписания', '*.pdf')])],
         [sg.Text('Перед подписанием закройте PDF файл подлежащий подписанию!',key='caution',background_color='red',text_color='white')],
@@ -36,7 +37,8 @@ def clear_input(window,sg):
 
 def check_input(values,sg):
     keys_missed = []
-    key_dict = {'FILE': 'Не выбран файл для подписания',
+    key_dict = {'function': 'Не введено название должности',
+                'FILE': 'Не выбран файл для подписания',
                 'PFX': 'Не выбран сертификат для подписания',
                 'PASSWORD': 'Не введён пароль для сертификата',
                 'FOLDER': 'Не выбрана папка для сохранения подписанного документа',
@@ -93,10 +95,4 @@ def excel_to_pdf(values):
 
 
 if __name__ == '__main__':
-    # import PySimpleGUI as sg
-    #
-    import win32api
-
-    print(win32api.FormatMessage(-2147018887))
-    # sg.theme_previewer()
-    # subprocess.Popen([ r"C:/Users/skryabin.p/Desktop/СЗ_лист №2 (оборотный).pdf"],shell=True)
+    pass
